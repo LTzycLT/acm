@@ -1,0 +1,29 @@
+void Stirling1(int n,ll s[][N]){
+    s[0][0] = 1;
+    s[1][0] = 0;
+    s[1][1] = 1;
+    for(int i=2;i<=n;i++){
+        s[i][0] = 0;
+        for(int j=1;j<=i;j++)
+            s[i][j] = (s[i-1][j-1] + (i-1) * s[i-1][j]) % mod;
+    }
+}
+
+void Stirling2(int n,ll s[][N]){
+    s[0][0] = 1;
+    s[1][0] = 0;
+    s[1][1] = 1;
+    for(int i=2;i<=n;i++){
+        s[i][0] = 0;
+        for(int j=1;j<=i;j++)
+            s[i][j] = (s[i-1][j-1] + j * s[i-1][j]) % mod;
+    }
+}
+
+void Bell(int n,ll s[]){
+    s[0] = 1;
+    for(int i=1;i<=n;i++)
+        for(int j=0;j<i;j++)
+            s[i] = (s[i] + c.get(i-1,j) * s[j]) % mod;
+
+}

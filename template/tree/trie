@@ -1,0 +1,34 @@
+const int ch = 2;
+const int N=1000000;
+class Trie{
+    public:
+    int trie[N][ch+1],sw[200];
+    int top;
+    void init(){
+        top = 0;
+        clr(trie[0],-1);
+        sw['0'] = 0;
+        sw['1'] = 1;
+    }
+    void insert(char s[],int len){
+        int tmp = 0,nxt = 0;
+        for(int i=0;i<len;i++,tmp=nxt){
+            nxt = trie[tmp][sw[s[i]]];
+            if(nxt==-1){
+                top++;
+                clr(trie[top],-1);
+                trie[tmp][sw[s[i]]] = nxt =top;
+            }
+        }
+        trie[tmp][ch] = 1;
+    }
+    int count(int rt){
+        int sum = 0;
+        for(int i=0;i<ch;i++){
+            if(trie[rt][i]!=-1)
+                sum += count(trie[rt][i]);
+        }
+        if(trie[rt][ch]!=-1) sum++;
+        return sum ;
+    }
+}t;

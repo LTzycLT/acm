@@ -1,0 +1,94 @@
+// 所加的边1~m,点可以任意
+typedef long long typec;
+const typec finf = 1e18;
+const int N = 21000, M = 410000 * 2;
+class FlowNetwork
+{
+    int possible;
+    int e, head[N], d[N], vd[N], pre[N], cur[N];
+    int nxt[M], eu[M], ev[M];
+    typec c[M],mi[M],deg[N];
+    void add(int u,int v,typec w){
+        eu[e]=u; ev[e]=v; c[e]=w; nxt[e]=head[u]; head[u]=e++;
+        eu[e]=v; ev[e]=u; c[e]=0; nxt[e]=head[v]; head[v]=e++;
+    }
+    typec sap(int s,int t,int n)
+    {
+        int i, u;
+        clr(d, 0);
+        clr(vd, 0);
+        vd[0] = n;
+        cur[u = s] = head[s];
+        pre[s] = -1;
+        typec temp, ans = 0;
+        while (d[s] < n)
+        {
+            if(u == t)
+            {
+                for(temp = finf, i = pre[u]; ~i; i = pre[eu[i]])
+                    temp = min(temp, c[i]);
+                for(i = pre[u]; ~i; i = pre[eu[i]])
+                {
+                    c[i] -= temp;
+                    c[i ^ 1] += temp;
+                }
+                ans += temp;
+                u = s;
+            }
+            for (i = cur[u]; ~i; i = nxt[i])
+                if (c[i] > 0 && d[u] == d[ev[i]] + 1)
+                {
+                    cur[u] = i;
+                    pre[u = ev[i]] = i;
+                    break;
+                }
+            if(i == -1)
+            {
+                cur[u] = head[u];
+                if (--vd[d[u]] == 0)break;
+                vd[++d[u]]++;
+                if(u != s)u = eu[pre[u]];
+            }
+        }
+        return ans;
+    }
+    public:
+    void init()
+    {
+        possible = 1;
+        e = 0;
+        clr(head, -1);
+        clr(deg,0);
+    }
+    void addedge(int u, int v, typec L,typec R)
+    {
+        typec w = R-L;
+        mi[e/2] = L;
+        if(w<0) possible = 0;
+        deg[u]-=L;
+        deg[v]+=L;
+        add(u,v,w);
+    }
+    typec run(int pres,int pret,int minn,int maxn){                 //原来的s,t,和最大最小的点的标号
+        if(!possible) return -1;
+
+        typec sum  = 0;
+        int s = maxn+1, t = maxn+2;
+
+        for(int i=minn;i<=maxn;i++){
+            if(deg[i]>0)
+                add(s,i,deg[i]),sum+=deg[i];
+            else
+                add(i,t,-deg[i]);
+        }
+        sum -= sap(s,t,maxn-minn+3);
+        addedge(pret,pres,0,finf);
+        sum -= sap(s,t,maxn-minn+3);
+        if(sum!=0) return -1;
+
+        return c[e-1];
+    }
+    typec flow(int i){    //第i条边上的流量
+        return  mi[i-1] + c[i*2-1];
+    }
+}fl;

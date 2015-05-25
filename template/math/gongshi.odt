@@ -1,0 +1,11 @@
+﻿计算∑(floor((ax + b) / c), 0≤x<n)
+
+ll calc(ll a, ll b, ll c, ll n){
+    ll ans = 0;
+    ans += b / c * n;
+    b %= c;
+    ans += a / c * n * (n-1) / 2;
+    a %= c;
+    if(a * n + b < c) return ans;
+    return ans + calc(c, (a * n + b) % c, a, (a * n + b) / c);
+}

@@ -1,0 +1,35 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Scanner;
+
+public class Main {
+	
+	public static void main(String args[]){
+		ArrayList<points> a = new ArrayList<points>();
+		Collections.sort(a, new cmp());
+
+		points[] b = new points[100];
+		Arrays.sort(b,0,1,new cmp());
+	}
+	
+	static class points{
+		points(int x,int y){
+			this.x = x;
+			this.y = y;
+		}
+		int x,y;
+	}
+	
+	static class cmp implements Comparator<points>{
+
+		@Override
+		public int compare(points arg0, points arg1) {
+			if(arg0.x < arg1.x) return -1;
+			else  return 1;
+		}
+		
+	}
+	
+}

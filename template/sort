@@ -1,0 +1,88 @@
+
+//快速排序
+
+int random(int x){
+//    printf("%d\n",rand());
+    return rand()%x;
+}
+
+typedef int T;
+void quick_sort(T a[],int l,int r){
+    if(l>=r-1) return ;
+    T w=a[(l+r)/2];
+
+    int i=l,j=r-1;
+    while(i<=j){
+        while(a[i]<w) i++;
+        while(a[j]>w) j--;
+
+        if(i<=j){
+            swap(a[i],a[j]);
+            i++;
+            j--;
+        }
+    }
+    quick_sort(a,l,j+1);
+    quick_sort(a,i,r);
+}
+
+
+//归并排序
+
+typedef int T;
+T st[1000000];
+void merge_sort(T a[],int l,int r){
+    if(l>=r-1) return ;
+    int mid=(l+r)/2;
+    merge_sort(a,l,mid);
+    merge_sort(a,mid,r);
+    int p=l,q=mid;
+    for(int i=0;i<r-l;i++){
+        if((p<mid&&a[p]<a[q])||q>=r) st[i]=a[p++];
+        else st[i]=a[q++];
+    }
+    for(int i=l;i<r;i++) a[i]=st[i-l];
+}
+
+
+// 堆
+typedef int T;
+const int N=100000;
+class heap{
+    int sz;
+    int val[N];
+    public:
+    bool empty(){return sz==0?true:false;}
+    void clear(){sz=0;}
+    bool cmp(T a,T b){
+        if(a<b) return true;        //“<”小根堆 ">"大根堆
+        else return false;
+    }
+    void add(T w){
+        sz++;
+        val[sz]=w;
+        int rt=sz;
+        while(rt!=1){
+            if(cmp(val[rt],val[rt/2])){
+                swap(val[rt],val[rt/2]);
+                rt/=2;
+            }else break;
+        }
+    }
+    void pop(){
+        if(sz==0) return ;
+        swap(val[1],val[sz]);
+        sz--;
+        int rt=1;
+        while(rt*2<=sz){
+            int nxt=rt*2;
+            if(rt*2+1<=sz && !cmp(val[rt*2],val[rt*2+1]))
+                nxt=rt*2+1;
+            if(!cmp(val[rt],val[nxt])){
+                swap(val[rt],val[nxt]);
+                rt=nxt;
+            }else break;
+        }
+    }
+    T top(){return sz==0?NULL:val[1];}
+}zyc;

@@ -1,0 +1,118 @@
+bitset<16>
+b.any()
+b中是否存在置为1的二进制位？
+b.none()
+b中不存在置为1的二进制位吗？
+b.count()
+b中置为1的二进制位的个数
+b.size()
+b中二进制位的个数
+b[pos]
+访问b中在pos处的二进制位
+b.test(pos)
+b中在pos处的二进制位是否为1？
+b.set()
+把b中所有二进制位都置为1
+b.set(pos)
+把b中在pos处的二进制位置为1
+b.reset()
+把b中所有二进制位都置为0
+b.reset(pos)
+把b中在pos处的二进制位置为0
+b.flip()
+把b中所有二进制位逐位取反
+b.flip(pos)
+把b中在pos处的二进制位取反
+b.to_ulong()
+用b中同样的二进制位返回一个unsigned long值
+os << b
+把b中的位集输出到os流
+
+
+const int N=3000;
+
+typedef unsigned long long T;
+const int sz=63; // ||31
+
+struct bitset{
+    T a[N];
+    int n, nn;
+    bitset(){}
+    bitset(int _n){
+        n = _n;
+        nn = n / sz + 1;
+        for(int i = 0; i < nn; i++) a[i] = 0;
+    }
+    bitset operator<<(int x)const{
+        bitset ans(n);
+        int gap = x / sz;
+        int high = x % sz;
+        int low = sz - high;
+        T down = (1LL << low) - 1;
+        T up = (~0) - down;
+//        cout<<down<<endl;
+        for(int i = 0; i < nn; i++){
+            if(i + gap + 1 < nn)
+                ans.a[i + gap + 1] |= (a[i] & up) >> low;
+            if(i + gap < nn)
+                ans.a[i + gap] |= (a[i] & down) << high;
+        }
+        ans.a[nn-1] &= (1LL << (n % sz)) - 1;
+        return ans;
+    }
+    bitset operator>>(int x)const{
+        bitset ans(n);
+        int gap = x / sz;
+        int low = x % sz;
+        int high = sz - low;
+        T down = (1LL << low) - 1;
+        T up = (~0) - down;
+        for(int i = 0; i < nn; i++){
+            if(i - gap >= 0)
+                ans.a[i - gap] |= (a[i] & up) >> low;
+            if(i - gap - 1 >= 0)
+                ans.a[i - gap - 1] |= (a[i] & down) << high;
+        }
+        return ans;
+    }
+    bool get(int x)const{
+        int i = x / sz, j = x % sz;
+        return (a[i] >> j) & 1 ;
+    }
+    void set(int x,bool y){
+        int i = x / sz, j = x % sz;
+        if(y == 0) a[i] &= ~(1LL << j);
+        else a[i] |= (1LL << j);
+    }
+    T getBlock(int x)const{
+        return a[x];
+    }
+    void setBlock(int x,T y){
+        a[x]=y;
+    }
+    void debug(){
+        for(int i = n - 1; i >= 0; i--){
+            printf("%d ",get(i));
+        }
+        puts("");
+    }
+    bitset operator|(const bitset A)const{
+        bitset ans(n);
+        for(int i=0;i<nn;i++)
+            ans.setBlock(i,getBlock(i)|A.getBlock(i));
+        return ans;
+    }
+    bitset operator&(const bitset A)const{
+        bitset ans(n);
+        for(int i=0;i<nn;i++)
+            ans.setBlock(i,getBlock(i)&A.getBlock(i));
+        return ans;
+    }
+    bitset operator^(const bitset A)const{
+        bitset ans(n);
+        for(int i=0;i<nn;i++)
+            ans.setBlock(i,getBlock(i)^A.getBlock(i));
+        return ans;
+    }
+};
+
