@@ -24,10 +24,14 @@ int main()
     active.insert(40);
     active.insert(50);
     //return the nth element
-    if(active.find_by_order(4) != active.end()) {
-        cout << *active.find_by_order(4) << endl;
+    if(active.find_by_order(3) != active.end()) {
+        //output 40
+        cout << *active.find_by_order(3) << endl;
     }
     //return order n
-    cout << active.order_of_key(110) << endl;
+    //output 3
+    cout << active.order_of_key(40) << endl;
+    //output 4
+    cout << active.order_of_key(44) << endl;
     return 0;
 }
