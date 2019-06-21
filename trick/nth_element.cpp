@@ -4,14 +4,13 @@
 using namespace std;
 using namespace __gnu_pbds;
 
+
 //c++11 and more
 //comparer: less less_equal greater greater_equal equal not_equal_to
 template <typename T>
 using oset = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-
 template <typename K, typename V>
 using omap = tree<K, V, less<K>, rb_tree_tag, tree_order_statistics_node_update>;
-
 //less than c++11
 typedef tree<int, int, less<int>, rb_tree_tag, tree_order_statistics_node_update> map_t;
 
@@ -29,6 +28,7 @@ int main()
         cout << *active.find_by_order(3) << endl;
     }
     //return order n
+
     //output 3
     cout << active.order_of_key(40) << endl;
     //output 4
