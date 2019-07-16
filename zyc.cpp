@@ -70,37 +70,37 @@ map<int, int> mp, invmp;
 int a[100005];
 const int MAXN = 100005;
 int rt[MAXN], v[MAXN << 6], ls[MAXN << 6], rs[MAXN << 6], tot;
-void build(int l, int r, int &n) {
-    if (!n) n = ++tot;
+void build(int l, int r, int &nd) {
+    if (!nd) nd = ++tot;
     if (l == r) return;
     int m = (l + r) / 2;
-    build(l, m, ls[n]);
-    build(m + 1, r, rs[n]);
+    build(l, m, ls[nd]);
+    build(m + 1, r, rs[nd]);
 }
-void update(int p, int x, int l, int r, int ln, int &n) {
-    n = ++tot, v[n] = v[ln] + x, ls[n] = ls[ln], rs[n] = rs[ln];
+void update(int p, int x, int l, int r, int lnd, int &nd) {
+    nd = ++tot, v[nd] = v[lnd] + x, ls[nd] = ls[lnd], rs[nd] = rs[lnd];
     if (l == r) return;
     int m = (l + r) / 2;
     if (p <= m)
-        update(p, x, l, m, ls[ln], ls[n]);
+        update(p, x, l, m, ls[lnd], ls[nd]);
     else
-        update(p, x, m + 1, r, rs[ln], rs[n]);
+        update(p, x, m + 1, r, rs[lnd], rs[nd]);
 }
 //区间求和
-int query(int ql, int qr, int l, int r, int n) {
-    if (ql == l && qr == r) return v[n];
-    int m = (l + r) / 2;
-    if (qr <= m) return query(ql, qr, l, m, ls[n]);
-    if (ql > m) return query(ql, qr, m + 1, r, rs[n]);
-    return query(ql, m, l, m, ls[n]) + query(m + 1, qr, m + 1, r, rs[n]);
+int query(int ql, int qr, int l, int r, int nd) {
+    if (ql == l && qr == r) return v[nd];
+    int mid = (l + r) / 2;
+    if (qr <= mid) return query(ql, qr, l, mid, ls[nd]);
+    if (ql > mid) return query(ql, qr, mid + 1, r, rs[nd]);
+    return query(ql, mid, l, mid, ls[nd]) + query(mid + 1, qr, mid + 1, r, rs[nd]);
 }
 //区间求第k大
-int kth_element(int k, int l, int r, int ln, int n) {
+int kth_element(int k, int l, int r, int lnd, int nd) {
     if(l == r) return l;
-    int m = (l + r) / 2;
-    int lv = v[ls[n]] - v[ls[ln]];
-    if(k <= lv) return kth_element(k, l, m, ls[ln], ls[n]);
-    else return kth_element(k - lv, m + 1, r, rs[ln], rs[n]);
+    int mid = (l + r) / 2;
+    int lv = v[ls[nd]] - v[ls[lnd]];
+    if(k <= lv) return kth_element(k, l, mid, ls[lnd], ls[nd]);
+    else return kth_element(k - lv, mid + 1, r, rs[lnd], rs[nd]);
 }
 
 int main() {
@@ -132,6 +132,7 @@ int main() {
     }
     return 0;
 }
+ 
 
 /*==============================================================================*\
     2) mod int
