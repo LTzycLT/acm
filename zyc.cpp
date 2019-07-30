@@ -231,3 +231,77 @@ struct mod_int {
 		return result;
 	}
 }
+
+/*==============================================================================*\
+    3) ball box
+  \*==============================================================================*/
+
+mod_int factorial(int n) {
+    mod_int result = 1;
+    for(int i = 1; i <= n; i++) {
+        result *= i;
+    }
+    return result.val;
+}
+mod_int combination(int n, int m) {
+    for(int i = 0; i <= n; i++) {
+        f[i][0] = f[i][1] = 1;
+        for(int j = 1; j < m; j++) {
+            f[i][j] = f[i - 1][j] + f[i - 1][j - 1];
+        }
+    }
+    return f[n][m];
+}
+
+const int N = 1005;
+mod_int f[N][N];
+mod_int distinct_ball_same_box(int n, int m) {
+    //not empty
+    f[0][0] = 1;
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= m; j++) {
+            f[i][j] = f[i - 1][j - 1] + f[i - 1][j] * j;
+        }
+    }
+    return f[n][m];
+
+    //empty
+    mod_int ans = 0;
+    for(int i = 1; i <= m; i++) {
+        ans += f[n][i];
+    }
+    return ans;
+}
+
+mod_int distinct_ball_distinct_box(int n, int m) {
+    //not empty
+    return factorial(m) * distinct_ball_same_box(n, m);
+
+    //empty
+    return mod_int(n).pow(m);
+}
+
+mod_int same_ball_distinct_box(int n, int m) {
+    //not empty
+    return combination(n - 1, m - 1);
+
+    //empty
+    return combination(n + m - 1, m - 1);
+}
+
+mod_int same_ball_same_box(int n, int m) {
+    for(int i = 1; i <= n; i++) f[1][i] = 1;
+    for(int i = 1; i <= m; i++) f[i][1] = 1;
+    for (int i = 2; i <= n; i++) {
+        for (int j = 2; j <= m; j++) {
+            f[i][j] = f[i - 1][j];
+            if(i >= j) {
+                f[i][j] += f[i - j][j];
+            }
+        }
+    }
+    //empty
+    return f[n][m];
+    //not empty
+    return f[n - m][m];
+}
