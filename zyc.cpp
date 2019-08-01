@@ -305,3 +305,65 @@ mod_int same_ball_same_box(int n, int m) {
     //not empty
     return f[n - m][m];
 }
+
+/*==============================================================================*\
+    3) shortest path
+  \*==============================================================================*/
+
+const int inf = 1e9;
+
+int n, m;
+const int n = 1005, m = 100005;
+
+int head[n], ev[m], ew[m], nxt[m], e; 
+
+void addedge(int u, int v, int w) {
+    ev[e] = v; ew[e] = w; nxt[e] = head[u]; head[u] = e++;
+    ev[e] = u; ew[e] = w; nxt[e] = head[v]; head[v] = e++;
+}
+
+int d[n], vis[n];
+
+int dij(int s, int t) {
+    for(int i = 0; i < n; i++) d[i] = inf, vis[i] = false;;
+    d[s] = 0;
+    priority_queue<pair<int, int> > q;
+    q.push(make_pair(0, s));
+    while(q.size() > 0) {
+        int u = q.top().second;
+        q.pop();
+        if(vis[u]) continue;
+        vis[u] = true;
+        for(int i = head[u]; i != -1; i = nxt[i]) {
+            int v = ev[i], w = ew[i];
+            if(d[u] + w < d[v]) {
+                d[v] = d[u] + w;
+                q.push(make_pair(-d[v], v));
+            }
+        }
+    }
+    return d[t] < inf ? d[t] : -1;
+}
+
+int spfa(int s, int t) {
+    for(int i = 0; i < n; i++) d[i] = inf, vis[i] = false;;
+    d[s] = 0;
+    queue<int> q;
+    q.push(s);
+    vis[s] = true;
+    while(q.size() > 0) {
+        int u = q.front();
+        vis[u] = false;
+        q.pop();
+        for(int i = head[u]; i != -1; i = nxt[i]) {
+            int v = ev[i], w = ew[i];
+            if(d[u] + w < d[v]) {
+                d[v] = d[u] + w;
+                if(!vis[v]) {
+                    q.push(v);
+                }
+            }
+        }
+    }
+    return d[t] < inf ? d[t] : -1;
+}
