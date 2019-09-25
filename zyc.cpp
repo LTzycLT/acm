@@ -1,8 +1,13 @@
 /*
-
+index
 1) 平衡树找第K大数，或数字为第几大
 2) 子集遍历
-
+3) 线段树 区间更新 区间求和
+4) 主席树
+5) mod int
+6) ball box
+7) shortest path
+8) 二分匹配 匈牙利
 */
 
 /*==============================================================================*\
@@ -62,7 +67,62 @@ for(int l = (rt - 1) & rt; l > 0; l = (l - 1) & rt) {
 }
 
 /*==============================================================================*\
-    3) 主席树
+    3) 线段树 区间更新 区间求和
+  \*==============================================================================*/
+
+LL val[N], sum[N];
+void update(int l, int r, LL w, int sl, int sr, int rt) {
+    //printf("%d %d %d %d\n", l, r, sl, sr);
+    if(l == sl && r == sr) {
+        val[rt] += w;
+        sum[rt] += (r - l + 1) * w;
+        return ;
+    }
+    int m = (sl + sr) / 2;
+    if(r <= m) update(l, r, w, sl, m, rt * 2);
+    else if(l > m) update(l, r, w, m + 1, sr, rt * 2 + 1);
+    else {
+        update(l, m, w, sl, m, rt * 2);
+        update(m + 1, r, w, m + 1, sr, rt * 2 + 1);
+    }
+    sum[rt] = (sr - sl + 1) * val[rt] + sum[rt * 2] + sum[rt * 2 + 1];
+}
+
+LL query(int l, int r, int sl, int sr, int rt) {
+    if(l == sl && r == sr) {
+        return sum[rt];
+    }
+
+    int m = (sl + sr) / 2;
+
+    val[rt * 2] += val[rt];
+    sum[rt * 2] += val[rt] * (m - sl + 1);
+    val[rt * 2 + 1] += val[rt]; 
+    sum[rt * 2 + 1] += val[rt] * (sr - m);
+    val[rt] = 0;
+
+    LL ans;
+    if(r <= m) ans = query(l, r, sl, m, rt * 2);
+    else if(l > m) ans = query(l, r, m + 1, sr, rt * 2 + 1);
+    else {
+        ans = query(l, m, sl, m, rt * 2) + query(m + 1, r, m + 1, sr, rt * 2 + 1);
+    }
+    sum[rt] = (sr - sl + 1) * val[rt] + sum[rt * 2] + sum[rt * 2 + 1];
+    return ans;
+}
+
+int main() {
+    for(int i = 1; i <= 4 * n; i++) {
+        val[i] = sum[i] = 0;
+    }
+
+    update(l, r, w, 1, n, 1);
+    query(l, r, 1, n, 1);
+    return 0;
+}
+
+/*==============================================================================*\
+    4) 主席树
   \*==============================================================================*/
 
 int n, m;
@@ -135,7 +195,7 @@ int main() {
  
 
 /*==============================================================================*\
-    2) mod int
+    5) mod int
   \*==============================================================================*/
 
 const int MOD = 1e9 + 7;
@@ -233,7 +293,7 @@ struct mod_int {
 }
 
 /*==============================================================================*\
-    3) ball box
+    6) ball box
   \*==============================================================================*/
 
 mod_int factorial(int n) {
@@ -307,7 +367,7 @@ mod_int same_ball_same_box(int n, int m) {
 }
 
 /*==============================================================================*\
-    3) shortest path
+    7) shortest path
   \*==============================================================================*/
 
 const int inf = 1e9;
@@ -367,3 +427,46 @@ int spfa(int s, int t) {
     }
     return d[t] < inf ? d[t] : -1;
 }
+
+/*==============================================================================*\
+    8) 二分匹配 匈牙利
+  \*==============================================================================*/
+
+class Hungary {
+    public:
+    vector<int> match, used;
+    vector<vector<int> > e;
+    int ln, rn;
+        
+    void init(int _ln, int _rn) {
+        ln = _ln;
+        rn = _rn;
+        match = vector<int>(rn, -1);
+        used = vector<int>(rn, 0);
+        e = vector<vector<int> >(ln);
+    }
+    void addedge(int u, int v) {
+        e[u].push_back(v);
+    }
+    bool dfs(int u) {
+        for(auto v: e[u]) {
+            if(!used[v]) {
+                used[v] = 1; 
+                if(match[v] == -1 || dfs(match[v])) {
+                    match[v] = u; 
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    int run() {
+        int ans = 0;
+        for(int i = 0; i < rn; i++) match[i] = -1;
+        for(int i = 0; i < ln; i++) {
+            for(int j = 0; j < rn; j++) used[j] = 0;
+            if(dfs(i)) ans += 1;
+        }
+        return ans;
+    }
+};
