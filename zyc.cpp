@@ -70,6 +70,8 @@ for(int l = (rt - 1) & rt; l > 0; l = (l - 1) & rt) {
     3) 线段树 区间更新 区间求和
   \*==============================================================================*/
 
+#define LL long long
+const int N = 500000;
 LL val[N], sum[N];
 void update(int l, int r, LL w, int sl, int sr, int rt) {
     //printf("%d %d %d %d\n", l, r, sl, sr);
@@ -441,6 +443,7 @@ class Hungary {
     void init(int _ln, int _rn) {
         ln = _ln;
         rn = _rn;
+        match.clear(); used.clear(); e.clear();
         match = vector<int>(rn, -1);
         used = vector<int>(rn, 0);
         e = vector<vector<int> >(ln);
