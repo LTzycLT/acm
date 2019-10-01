@@ -8,6 +8,8 @@ index
 6) ball box
 7) shortest path
 8) 二分匹配 匈牙利
+9) Prime
+10) pow2
 */
 
 /*==============================================================================*\
@@ -473,3 +475,56 @@ class Hungary {
         return ans;
     }
 };
+/*==============================================================================*\
+    9) Prime
+
+    得到质因子getPrimeFactor(x), 需要init(sqrt(x) + 1)
+  \*==============================================================================*/
+
+
+class Prime {
+    public:
+    vector<bool> f;
+    vector<LL> p;
+    void init(int maxx) {
+        f = vector<bool>(maxx + 1, 0);
+        p.clear();
+        for(int i = 2; i <= maxx; i++) {
+            if(f[i] == 0) {
+                p.push_back(i);
+                for(int j = i + i; j <= maxx; j += i) {
+                    f[j] = 1;
+                }
+            }
+        }
+    }
+    vector<int> getPrimeFactor(LL x) {
+        vector<int> ans;
+        for(auto prime: p) {
+            if(prime * prime > x) break;
+            if(x % prime == 0) {
+                ans.push_back(prime);
+                while(x % prime == 0) {
+                    x /= prime;
+                }
+            }
+        }
+        if(x > 1) ans.push_back(x);
+        return ans;
+    }
+};
+
+
+/*==============================================================================*\
+    10) pow2
+    计算a^b
+  \*==============================================================================*/
+LL pow2(LL a, LL b) {
+    LL ans = 1;
+    while(b > 0) {
+        if(b & 1) ans = (ans * a) % mod;
+        a = (a * a) % mod;
+        b >>= 1;
+    }
+    return ans;
+}
