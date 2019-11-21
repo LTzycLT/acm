@@ -498,8 +498,8 @@ class Prime {
             }
         }
     }
-    vector<int> getPrimeFactor(LL x) {
-        vector<int> ans;
+    vector<LL> getPrimeFactor(LL x) {
+        vector<LL> ans;
         for(auto prime: p) {
             if(prime * prime > x) break;
             if(x % prime == 0) {
