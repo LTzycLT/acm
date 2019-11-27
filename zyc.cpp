@@ -9,7 +9,8 @@ index
 7) shortest path
 8) 二分匹配 匈牙利
 9) Prime
-10) pow2
+10) pow2 逆元
+11) 组合数
 */
 
 /*==============================================================================*\
@@ -516,8 +517,7 @@ class Prime {
 
 
 /*==============================================================================*\
-    10) pow2
-    计算a^b
+    10) pow2, 逆元
   \*==============================================================================*/
 LL pow2(LL a, LL b) {
     LL ans = 1;
@@ -528,3 +528,46 @@ LL pow2(LL a, LL b) {
     }
     return ans;
 }
+
+LL inv(LL x) {
+    return pow2(x, mod - 2);
+}
+
+/*==============================================================================*\
+    11) 组合数 c[n][m]
+  \*==============================================================================*/
+class Combination{
+    //mode=1: pre cal c[n][m]
+    //mode=2: pre cal fac[] invfac[] => fac[n] * invfac[m] * invfac[n - m]
+    public:
+        Combination(int _mode, int _sz): mode(_mode), sz(_sz){
+            if(mode == 1) {
+                c = vector<vector<LL>>(sz + 1, vector<LL>(sz + 1, 0));
+                c[0][0] = 1;
+                for(int i = 1; i <= sz; i++) {
+                    c[i][0] = c[i][i] = 1;
+                    for(int j = 1; j < i; j++) {
+                        c[i][j] = (c[i - 1][j] + c[i - 1][j - 1]) % mod;
+                    }
+                }
+            }
+            else {
+                fac = vector<LL>(sz + 1);
+                invfac = vector<LL>(sz + 1);
+                fac[0] = invfac[0] = 1;
+                for(int i = 1; i <= sz; i++) {
+                    fac[i] = fac[i - 1] * i % mod;
+                    invfac[i] = invfac[i - 1] * inv(i) % mod;
+                }
+            }
+        }
+        LL get(int n, int m){
+            assert(m <= n && n <= sz);
+            if(mode == 1) return c[n][m];
+            else return fac[n] * invfac[m] % mod * invfac[n - m] % mod;
+        }
+
+        int mode, sz;
+        vector<vector<LL>> c;
+        vector<LL> fac, invfac;
+};
