@@ -529,13 +529,28 @@ LL pow2(LL a, LL b) {
     return ans;
 }
 
-LL inv(LL x) {
-    return pow2(x, mod - 2);
-}
+class Inverse{
+    public:
+        vector<LL> inv;
+        int sz;
+    Inverse(int _sz = 0){
+        sz = max(1, _sz);
+        inv = vector<LL>(sz + 1);
+        inv[1] = 1;
+        for(int i = 2; i <= sz; i++) {
+            inv[i] = inv[mod % i] * (mod - mod / i) % mod;
+        }
+    }
+    LL get(LL x) {
+        if(x <= sz) return inv[x];
+        else return pow2(x, mod - 2);
+    }
+};
 
 /*==============================================================================*\
     11) 组合数 c[n][m]
   \*==============================================================================*/
+
 class Combination{
     //mode=1: pre cal c[n][m]
     //mode=2: pre cal fac[] invfac[] => fac[n] * invfac[m] * invfac[n - m]
@@ -552,12 +567,13 @@ class Combination{
                 }
             }
             else {
+                Inverse inv(sz);
                 fac = vector<LL>(sz + 1);
                 invfac = vector<LL>(sz + 1);
                 fac[0] = invfac[0] = 1;
                 for(int i = 1; i <= sz; i++) {
                     fac[i] = fac[i - 1] * i % mod;
-                    invfac[i] = invfac[i - 1] * inv(i) % mod;
+                    invfac[i] = invfac[i - 1] * inv.get(i) % mod;
                 }
             }
         }
@@ -571,3 +587,4 @@ class Combination{
         vector<vector<LL>> c;
         vector<LL> fac, invfac;
 };
+
