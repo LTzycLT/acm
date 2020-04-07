@@ -1,5 +1,6 @@
 /*
 index
+0) template
 1) 平衡树找第K大数，或数字为第几大
 2) 子集遍历
 3) 线段树 区间更新 区间求和
@@ -11,7 +12,20 @@ index
 9) Prime
 10) pow2 逆元
 11) 组合数
+12) LCA 倍增
+13) suffix array
+14) 回文串
 */
+
+/*==============================================================================*\
+  1) template
+  \*==============================================================================*/
+mt19937 rng((unsigned int) chrono::steady_clock::now().time_since_epoch().count());
+rand = rng() % n;
+
+start = clock()
+const double TL = 1.5 * CLOCKS_PER_SEC;
+clock() - start < TL
 
 /*==============================================================================*\
   1) 平衡树找第K大数，或数字为第几大
@@ -72,10 +86,32 @@ for(int l = (rt - 1) & rt; l > 0; l = (l - 1) & rt) {
 /*==============================================================================*\
     3) 线段树 区间更新 区间求和
   \*==============================================================================*/
-
 #define LL long long
-const int N = 500000;
-LL val[N], sum[N];
+const int N = 200000;
+LL val[N * 4], sum[N * 4], base[N];
+
+void push_down(int rt, int sl, int m, int sr) {
+    val[rt * 2] += val[rt];
+    sum[rt * 2] += val[rt] * (m - sl + 1);
+    val[rt * 2 + 1] += val[rt]; 
+    sum[rt * 2 + 1] += val[rt] * (sr - m);
+    val[rt] = 0;
+}
+void push_up(int rt) {
+    sum[rt] = sum[rt * 2] + sum[rt * 2 + 1];
+    sum[rt] = sum[rt * 2] + sum[rt * 2 + 1];
+}
+void build(int sl, int sr, int rt) {
+  if(sl == sr) {
+    val[rt] = 0;
+    sum[rt] = base[sl];
+    return ;
+  }
+  int m = (sl + sr) / 2;
+  build(sl, m, rt * 2);
+  build(m + 1, sr, rt * 2 + 1);
+  push_up(rt);
+}
 void update(int l, int r, LL w, int sl, int sr, int rt) {
     //printf("%d %d %d %d\n", l, r, sl, sr);
     if(l == sl && r == sr) {
@@ -84,13 +120,14 @@ void update(int l, int r, LL w, int sl, int sr, int rt) {
         return ;
     }
     int m = (sl + sr) / 2;
+    push_down(rt, sl, m, sr);
     if(r <= m) update(l, r, w, sl, m, rt * 2);
     else if(l > m) update(l, r, w, m + 1, sr, rt * 2 + 1);
     else {
         update(l, m, w, sl, m, rt * 2);
         update(m + 1, r, w, m + 1, sr, rt * 2 + 1);
     }
-    sum[rt] = (sr - sl + 1) * val[rt] + sum[rt * 2] + sum[rt * 2 + 1];
+    push_up(rt);
 }
 
 LL query(int l, int r, int sl, int sr, int rt) {
@@ -99,28 +136,19 @@ LL query(int l, int r, int sl, int sr, int rt) {
     }
 
     int m = (sl + sr) / 2;
-
-    val[rt * 2] += val[rt];
-    sum[rt * 2] += val[rt] * (m - sl + 1);
-    val[rt * 2 + 1] += val[rt]; 
-    sum[rt * 2 + 1] += val[rt] * (sr - m);
-    val[rt] = 0;
-
+    push_down(rt, sl, m, sr);
     LL ans;
     if(r <= m) ans = query(l, r, sl, m, rt * 2);
     else if(l > m) ans = query(l, r, m + 1, sr, rt * 2 + 1);
     else {
         ans = query(l, m, sl, m, rt * 2) + query(m + 1, r, m + 1, sr, rt * 2 + 1);
     }
-    sum[rt] = (sr - sl + 1) * val[rt] + sum[rt * 2] + sum[rt * 2 + 1];
+    push_up(rt);
     return ans;
 }
 
 int main() {
-    for(int i = 1; i <= 4 * n; i++) {
-        val[i] = sum[i] = 0;
-    }
-
+    build(1, n, 1);
     update(l, r, w, 1, n, 1);
     query(l, r, 1, n, 1);
     return 0;
@@ -571,3 +599,251 @@ class Combination{
         vector<vector<LL>> c;
         vector<LL> fac, invfac;
 };
+
+/*==============================================================================*\
+    12) LCA倍增
+  \*==============================================================================*/
+
+#define clr(x, y) memset(x, y, sizeof(x))
+#define forn(i, n) for(int i = 0; i < n; i++)
+ 
+const int N = 100005;
+const int M = N * 2;
+const int H = 20;
+ 
+int e, head[N];
+int ev[M], nxt[M];
+struct graph {
+    void init() {
+        e = 0;
+        clr(head, -1);
+    }
+    void addedge(int u, int v) {
+        ev[e] = v;
+        nxt[e] = head[u];
+        head[u] = e++;
+        ev[e] = u;
+        nxt[e] = head[v];
+        head[v] = e++;
+    }
+}g;
+
+int ln[N];
+int pnt[N][H], depth[N], stk[N];
+struct LCA {
+    void init() {  // 求1-N所有log2(x)的值，只需初始化一次
+        ln[0] = ln[1] = 0;
+        for (int i = 2; i < N; ++i)
+            ln[i] = ln[i >> 1] + 1;
+    }
+    int getfather(int x, int len) {
+        while (len > 0) {
+            x = pnt[x][ln[len]];
+            len -= 1 << ln[len];
+        }
+        return x;
+    }
+    int lca(int x, int y) {
+        int low = 0, high = min(depth[x], depth[y]);
+        x = getfather(x, depth[x] - high);
+        y = getfather(y, depth[y] - high);
+        if (x == y) return x;
+            while (high - low > 1) {
+            int mid = ln[high - low - 1];
+            int nx = pnt[x][mid];
+            int ny = pnt[y][mid];
+            mid = high - (1 << mid);
+            if (nx == ny)
+                low = mid;
+            else {
+                high = mid;
+                x = nx;
+                y = ny;
+            }
+        }
+        return pnt[x][ln[high - low]];
+    }
+    /********下面求得depth[]和pnt[][]值，也可以通过其他方式求得********/
+     void build(const graph& g, int root, int n) {
+        forn(i, n) {
+            depth[i] = -1;
+            clr(pnt[i], -1);
+        }
+        int top = 1;
+        depth[stk[0] = root] = 0;
+        while (top) {  // 这里默认g为一颗树，若为森林需要修改此处
+            int u = stk[--top];
+            for (int i = head[u]; ~i; i = nxt[i]) {
+                int v = ev[i];
+                if (depth[v] != -1) continue;
+                stk[top++] = v;
+                pnt[v][0] = u;
+                depth[v] = depth[u] + 1;
+            }
+        }
+        for (int i = 1; i < H; ++i)
+            forn(u, n) if (pnt[u][i - 1] != -1)
+                pnt[u][i] = pnt[pnt[u][i - 1]][i - 1];
+    }
+}lca;
+ 
+int n, m;
+ 
+int dis(int u, int v) {
+    int f = lca.lca(u, v);
+    return depth[u] + depth[v] - 2 * depth[f];
+}
+int main() {
+    //freopen("in", "r", stdin);
+    g.init();
+    g.addedge(u, v);
+    lca.init();
+    lca.build(g, 0, n);
+    lca.lca(u, v);
+    return 0;
+}
+
+/*==============================================================================*\
+    13) suffix array
+  \*==============================================================================*/
+
+/*
+   srank[0...7]: 4 6 8 1 2 3 5 7
+string:
+a a b a a a a b
+------------------------------------------sa[1] = 3 : a a a a b
+height[1] = 0
+sa[2] = 4 : a a a b
+height[2] = 3
+sa[3] = 5 : a a b
+height[3] = 2
+sa[4] = 0 : a a b a a a a b height[4] = 3
+sa[5] = 6 : a b
+height[5] = 1
+sa[6] = 1 : a b a a a a b
+height[6] = 2
+sa[7] = 7 : b
+height[7] = 0
+sa[8] = 2 : b a a a a b
+height[8] = 1
+*/
+const int N = 200010;
+int ua[N], ub[N], us[N], sa[N];
+int cmp(int *r,int a,int b,int l){
+    return r[a]==r[b]&&r[a+l]==r[b+l];
+}
+void da(int *r,int *sa,int n,int m){ //da(r, sa, n + 1, 256);(r[n] = 0)
+    int i,j,p,*x=ua,*y=ub,*t;
+    //r[]存放原字符串，且从char变为int
+    for(i=0;i<m;i++) us[i]=0; //sa[i]表示排名为i的后缀起始下标(i>=1,sa[i]>=0)
+    for(i=0;i<n;i++) us[x[i]=r[i]]++;
+    for(i=1;i<m;i++) us[i]+=us[i-1];
+
+    for(i=n-1;i>=0;i--) sa[--us[x[i]]]=i;
+    for(j=1,p=1;p<n;j*=2,m=p){
+        for(p=0,i=n-j;i<n;i++) y[p++]=i;
+        for(i=0;i<n;i++) if(sa[i]>=j) y[p++]=sa[i]-j;
+        for(i=0;i<m;i++) us[i]=0;
+        for(i=0;i<n;i++) us[x[i]]++;
+        for(i=1;i<m;i++) us[i]+=us[i-1];
+        for(i=n-1;i>=0;i--) sa[--us[x[y[i]]]]=y[i];
+        for(t=x,x=y,y=t,p=1,x[sa[0]]=0,i=1;i<n;i++)
+            x[sa[i]]=cmp(y,sa[i-1],sa[i],j)?p-1:p++;
+    }
+}
+int srank[N],height[N]; //height[i]为排第i-1和第i的后缀的公共前缀长度
+void calheight(int *r,int *sa,int n){
+    int i,j,k=0;
+    for(i=1;i<=n;i++) srank[sa[i]]=i;
+    for(i=0;i<n;height[srank[i++]]=k)
+        for(k?k--:0,j=sa[srank[i]-1];r[i+k]==r[j+k];k++);
+}
+int *RMQ = height; // RMQ为查询的数组,这里RMQ=height
+//int RMQ[N];
+int mm[N];
+int best[20][N]; //best[i][j]表示[j, j + 2^i)区间中的最小值
+void initRMQ(int n){
+    int i,j,a,b;
+    for(mm[0]=-1,i=1;i<=n;i++)
+        mm[i]=((i&(i-1))==0)?mm[i-1]+1:mm[i-1];
+    for(i=1;i<=n;i++) best[0][i]=i;
+    for(i=1;i<=mm[n];i++)
+        for(j=1;j<=n+1-(1<<i);j++){
+            a=best[i-1][j];
+            b=best[i-1][j+(1<<(i-1))];
+            if(RMQ[a]<RMQ[b]) best[i][j]=a;
+            else best[i][j]=b;
+        }
+}
+int askRMQ(int a,int b){
+    int t;
+    t=mm[b-a+1];b-=(1<<t)-1;
+    a=best[t][a];b=best[t][b];
+    return RMQ[a]<RMQ[b]?a:b;
+}
+int lcp(int a,int b, int n){ //后缀r[a]和r[b]的公共前缀长度
+    int t;
+    if(a == b) return n - a;
+    a=srank[a];b=srank[b];
+    if(a>b) {t=a;a=b;b=t;}
+    return(height[askRMQ(a+1,b)]);
+}
+
+int main() {
+  int n;
+  //s can't contain 0 values
+  s[n] = 0;
+  da(s, sa, n + 1, 256);
+  calheight(s, sa, n);
+  initRMQ(n);
+  lcp(l, r, n);
+}
+
+/*==============================================================================*\
+    14) 回文串
+  \*==============================================================================*/
+
+/*
+   原串： w a a b w s w f d
+   新串r[]： $ # w # a # a # b # w # s # w # f # d #
+   辅助数组P： 1 2 1 2 3 2 1 2 1 2 1 4 1 2 1 2 1 2 1
+   p[id]- 1 就是该回文子串在原串中的长度
+   */
+
+const int N = 1100100 * 2;
+int r[N], p[N];
+void pk(int *r, int n, int *p) {
+    int i, id, mx = 0;
+    for (i = 1; i < n; ++i) {
+        if (mx > i) p[i] = min(p[2 * id - i], mx - i);
+        else p[i] = 1;
+
+        for (; r[i + p[i]] == r[i - p[i]]; p[i]++);
+        if (p[i] + i > mx) {
+            mx = p[i] + i;
+            id = i;
+        }
+    }
+}
+string solve(string str) {
+    int len = str.size();
+    int n = 0;
+    r[n++] = '$'; r[n++] = '#';
+    forn (i, len) {
+        r[n++] = str[i];
+        r[n++] = '#';
+    }
+    r[n] = 0;
+    pk(r, n, p);
+
+    //每一个长度>=2的回文串在原串中的位置
+    for(int i = 2; i < n - 1; i++) {
+      if(p[i] >= 3) {
+        int l;
+        if(i % 2 == 0) l = (i / 2 - 1) - (p[i] - 2) / 2;
+        else l = ((i + 1) / 2 - 1) - (p[i] - 1) / 2;
+        int r = l + p[i] - 2;
+      }
+    }
+}
+
