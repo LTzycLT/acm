@@ -15,6 +15,7 @@ index
 12) LCA 倍增
 13) suffix array
 14) 回文串
+15) matrix
 */
 
 /*==============================================================================*\
@@ -862,3 +863,44 @@ string solve(string str) {
       }
     }
 }
+
+/*==============================================================================*\
+    15) matrix
+  \*==============================================================================*/
+#define forn(i, n) for(int i = 0; i < n; i++)
+#define LL long long 
+
+const LL  mod = 998244353;
+const int SIZE = 300;
+
+struct matrix {
+  int n; LL a[SIZE][SIZE]; // SIZE 的极限是300
+  void clear() { forn (i, n) forn (j, n) a[i][j] = 0; }
+  matrix() {}
+  matrix(int z) { n = z; clear(); }
+  matrix operator *(const matrix& u) const {
+    matrix ans(n);
+    forn (i, n) forn (k, n) if (a[i][k])
+      forn (j, n) if (u.a[k][j]) {
+        ans.a[i][j] += a[i][k] * u.a[k][j];
+        if (ans.a[i][j] >= mod) ans.a[i][j] %= mod;
+      }
+    return ans;
+  }
+  matrix pow(LL k) {
+    matrix r(n), t = *this;
+    forn (i, n) r.a[i][i] = 1;
+    while (k) {
+      if (k & 1) r = t * r;
+      t = t * t; k >>= 1;
+    } return r;
+  }
+  matrix add_matrix(LL k) {
+    matrix r(2 * n), t, ret(n);
+    forn(i, n) forn(j, n) r.a[i][j] = r.a[i][j + n] = a[i][j];
+    forn(i, n) r.a[i + n][i + n] = 1;
+    t = r.pow(k);
+    forn(i, n) forn(j, n) ret.a[i][j] = t.a[i][j + n];
+    return ret;
+  }//连加求解 A + A^2 + A^3 + A^4 + A^5 + A^6 + A^7 .... A^n
+};
