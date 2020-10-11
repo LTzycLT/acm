@@ -4223,20 +4223,13 @@ int PointInPolygon(cpoint cp, cpoint p[], int n) {
 // 点到直线的距离，cp为点p0在直线上的射影
 
 double PointToLine(cpoint p0, cpoint p1, cpoint p2, cpoint &cp) {
-
-    double
-        double
-        cp.x =
-        cp.y =
-        return
-
-        d = dis(p1, p2);
-    s = cross(p1, p2, p0) / d ;
-    p0.x + s * (p2.y - p1.y) / d;
-    p0.y - s * (p2.x - p1.x) / d;
-    fabs(s); // s为有向距离
-
+    double d = dis(p1, p2);
+    double s = cross(p1, p2, p0) / d ;
+    cp.x = p0.x + s * (p2.y - p1.y) / d;
+    cp.y = p0.y - s * (p2.x - p1.x) / d;
+    return fabs(s); // s为有向距离
 }
+
 // 点在直线上的射影(可以拓展到三维)
 
 cpoint PointProjLine(cpoint p0, cpoint p1, cpoint p2) {
